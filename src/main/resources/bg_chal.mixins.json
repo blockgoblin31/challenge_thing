@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.blockgoblin31.challengemodthing.uyuiGh",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "bg_chal.mixins.refmap.json",
+  "mixins": [
+    "UhygBfd"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8.4"
+}
