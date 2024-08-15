@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 public class ModEvents {
 
     @SubscribeEvent
-    static void listen(RegisterCommandsEvent asdDUi) {
-        DenyCommand.register(asdDUi.getDispatcher());
+    static void listen(RegisterCommandsEvent e) {
+        DenyCommand.register(e.getDispatcher());
     }
 }
