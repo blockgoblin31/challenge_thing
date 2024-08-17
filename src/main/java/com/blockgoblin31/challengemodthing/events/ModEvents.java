@@ -2,7 +2,6 @@ package com.blockgoblin31.challengemodthing.events;
 
 import com.blockgoblin31.challengemodthing.ChallengeMod;
 import com.blockgoblin31.challengemodthing.commands.DenyCommand;
-import com.blockgoblin31.challengemodthing.items.CursedCuriosItem;
 import com.blockgoblin31.challengemodthing.items.ModItems;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -26,18 +25,12 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    static void listen(TickEvent.PlayerTickEvent e) {
-        if (e.phase != TickEvent.Phase.START) return;
-        if (e.side != LogicalSide.SERVER) return;
-    }
-
-    @SubscribeEvent
     static void listen(PlayerEvent.PlayerLoggedInEvent e) {
         Player player = e.getEntity();
         if (player.level().isClientSide) return;
         LazyOptional<ICuriosItemHandler> inventory = CuriosApi.getCuriosInventory(e.getEntity());
         inventory.ifPresent((handler) -> {
-            if (!handler.getStacksHandler("ring").get().getStacks().getStackInSlot(1).is(Items.AIR)) return;
+            if (!handler.getStacksHandler("ring").orElseThrow().getStacks().getStackInSlot(1).is(Items.AIR)) return;
             handler.setEquippedCurio("ring", 1, new ItemStack(ModItems.CURIO_ITEM.get(), 1));
         });
     }

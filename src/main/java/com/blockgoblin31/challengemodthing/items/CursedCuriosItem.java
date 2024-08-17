@@ -1,14 +1,10 @@
 package com.blockgoblin31.challengemodthing.items;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ByteArrayTag;
-import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -20,7 +16,6 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 
 public class CursedCuriosItem extends Item {
-    static final CompoundTag nbt = (CompoundTag) new CompoundTag().put("powered", ByteTag.valueOf(true));
 
     public CursedCuriosItem(Properties pProperties) {
         super(pProperties.stacksTo(1));
