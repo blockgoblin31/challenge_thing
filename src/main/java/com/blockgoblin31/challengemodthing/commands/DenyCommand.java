@@ -1,6 +1,5 @@
 package com.blockgoblin31.challengemodthing.commands;
 
-import com.blockgoblin31.challengemodthing.defs.SeVnb;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

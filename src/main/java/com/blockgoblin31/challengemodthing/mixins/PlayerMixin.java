@@ -1,15 +1,21 @@
 package com.blockgoblin31.challengemodthing.mixins;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,23 +25,33 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 
-@Mixin(Player.class)
-public abstract class PlayerMixin extends LivingEntity {
-    @Final
-    @Shadow
-    private Inventory inventory;
+@Mixin(ServerPlayer.class)
+//@Debug(export = true, print = true)
+public abstract class PlayerMixin extends Player {
 
-    protected PlayerMixin(EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    @Shadow public abstract PlayerAdvancements getAdvancements();
+
+    @Shadow @Final public MinecraftServer server;
+
+    public PlayerMixin(Level pLevel, BlockPos pPos, float pYRot, GameProfile pGameProfile) {
+        super(pLevel, pPos, pYRot, pGameProfile);
     }
 
-    @Inject(method="Lnet/minecraft/world/entity/player/Player;closeContainer()V", at = @At("HEAD"), remap = true)
-    @Debug(export = true, print = true)
+    @Inject(method="doCloseContainer", at = @At("HEAD"), remap = true)
     private void bg_chal_closeContainer(CallbackInfo ci) {
-        NonNullList<ItemStack> items = inventory.items;
+        if (this.getPersistentData().contains("bg31.deny")) return;
+        if (!this.getAdvancements().getOrStartProgress(this.server.getAdvancements().getAdvancement(new ResourceLocation("minecraft:story/mine_stone"))).isDone()) return;
+        NonNullList<ItemStack> items = this.getInventory().items;
         ArrayList<ItemStack> greatest = new ArrayList<>();
         greatest.add(items.get(0));
-        for (ItemStack stack : items) {
+        for (int i = 9; i < items.size(); i++) {
+            ItemStack stack = items.get(i);
+            if (stack.is(Items.COBBLESTONE)) continue;
+            if (!stack.isStackable()) {
+                if (greatest.get(0).isStackable()) greatest.clear();
+                greatest.add(stack);
+                return;
+            }
             if (stack.getCount() > greatest.get(0).getCount()) {
                 greatest = new ArrayList<>();
                 greatest.add(stack);
@@ -44,6 +60,8 @@ public abstract class PlayerMixin extends LivingEntity {
             }
         }
         ItemStack stack = greatest.get(this.random.nextInt(greatest.size()));
-        stack.setCount((int) Math.ceil(stack.getCount() / 2.0));
+        int index = items.indexOf(stack);
+        int size = stack.isStackable() ? stack.getCount() : 64;
+        this.getInventory().setItem(index, new ItemStack(Items.COBBLESTONE, size));
     }
 }

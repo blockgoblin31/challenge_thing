@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -21,7 +22,8 @@ public class ModBlocks {
     }
 
     private static RegistryObject<Block> registerBlock(String name, Supplier<Block> sup) {
-        ModItems.blockItemMap.put(name, ModItems.itemRegister.register(name, () -> new BlockItem(sup.get(), new Item.Properties())));
-        return blockRegister.register(name, sup);
+        RegistryObject<Block> returnVal = blockRegister.register(name, sup);
+        ModItems.blockItemMap.put(name, ModItems.itemRegister.register(name, () -> new BlockItem(returnVal.get(), new Item.Properties())));
+        return returnVal;
     }
 }
