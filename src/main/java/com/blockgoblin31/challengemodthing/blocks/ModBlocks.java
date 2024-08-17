@@ -15,15 +15,13 @@ import java.util.function.Supplier;
 
 public class ModBlocks {
     static final DeferredRegister<Block> blockRegister = DeferredRegister.create(Registries.BLOCK, ChallengeMod.MODID);
-    static final RegistryObject<Block> blank = blockRegister.register("blank", () -> new Block(BlockBehaviour.Properties.of()));
 
     public static void register(IEventBus eventBus) {
         blockRegister.register(eventBus);
     }
 
-    private static RegistryObject<Block> registerBlock(String name, BlockBehaviour.Properties props) {
-        Block b = new Block(props);
-        ModItems.blockItemMap.put(name, ModItems.itemRegister.register(name, () -> new BlockItem(b, new Item.Properties())));
-        return blockRegister.register(name, () -> b);
+    private static RegistryObject<Block> registerBlock(String name, Supplier<Block> sup) {
+        ModItems.blockItemMap.put(name, ModItems.itemRegister.register(name, () -> new BlockItem(sup.get(), new Item.Properties())));
+        return blockRegister.register(name, sup);
     }
 }
