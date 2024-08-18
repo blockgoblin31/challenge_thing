@@ -45,7 +45,7 @@ public class CursedCuriosItem extends Item {
                 Vec3 angle = player.getLookAngle();
                 BlockPos playerPos = player.getOnPos();
                 BlockPos position = new BlockPos(angle.x < 0 ? playerPos.getX() + 1 : playerPos.getX() - 1, playerPos.getY(), angle.z < 0 ? playerPos.getZ() + 1 : playerPos.getZ() - 1);
-                if (!level.getBlockState(position).isAir() || !level.getBlockState(position.above()).isAir()) {
+                if (level.getBlockState(position).isSolid() || level.getBlockState(position.above()).isSolid()) {
                     return;
                 }
                 Creeper creeper = new Creeper(EntityType.CREEPER, level);
