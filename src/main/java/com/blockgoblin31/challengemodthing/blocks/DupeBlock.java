@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -15,11 +16,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 public class DupeBlock extends BaseEntityBlock {
-    protected DupeBlock(Properties pProperties) {
+    private final Function<Item, Item> itemFunc;
+    protected DupeBlock(Properties pProperties, Function<Item, Item> itemFunc) {
         super(pProperties);
+        this.itemFunc = itemFunc;
     }
 
     @Override
@@ -30,7 +34,7 @@ public class DupeBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new DupeBlockEntity(blockPos, blockState);
+        return new DupeBlockEntity(blockPos, blockState, itemFunc);
     }
 
     @Override

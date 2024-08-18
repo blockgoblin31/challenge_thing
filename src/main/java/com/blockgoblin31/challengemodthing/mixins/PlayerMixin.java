@@ -7,7 +7,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -38,14 +40,15 @@ public abstract class PlayerMixin extends Player {
         if (!this.getAdvancements().getOrStartProgress(this.server.getAdvancements().getAdvancement(new ResourceLocation("minecraft:story/mine_stone"))).isDone()) return;
         NonNullList<ItemStack> items = this.getInventory().items;
         ArrayList<ItemStack> greatest = new ArrayList<>();
-        greatest.add(items.get(0));
+        greatest.add(items.get(9));
         for (int i = 9; i < items.size(); i++) {
             ItemStack stack = items.get(i);
+            if (getItemInHand(InteractionHand.MAIN_HAND) == stack || getItemInHand(InteractionHand.OFF_HAND) == stack) continue;
             if (stack.is(Items.COBBLESTONE)) continue;
             if (!stack.isStackable()) {
-                if (greatest.get(0).isStackable()) greatest.clear();
+                if (greatest.get(0).isStackable() || greatest.get(0).is(Items.AIR)) greatest.clear();
                 greatest.add(stack);
-                return;
+                continue;
             }
             if (stack.getCount() > greatest.get(0).getCount()) {
                 greatest = new ArrayList<>();
@@ -55,8 +58,9 @@ public abstract class PlayerMixin extends Player {
             }
         }
         ItemStack stack = greatest.get(this.random.nextInt(greatest.size()));
+        if (stack.is(Items.AIR)) return;
         int index = items.indexOf(stack);
-        int size = stack.isStackable() ? stack.getCount() : 64;
+        int size = stack.isStackable() ? stack.getCount() : stack.getItem() instanceof BlockItem ? 64 : 1;
         this.getInventory().setItem(index, new ItemStack(Items.COBBLESTONE, size));
     }
 }

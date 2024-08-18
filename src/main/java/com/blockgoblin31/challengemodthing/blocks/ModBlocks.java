@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class ModBlocks {
     static final DeferredRegister<Block> blockRegister = DeferredRegister.create(Registries.BLOCK, ChallengeMod.MODID);
     static final DeferredRegister<BlockEntityType<?>> blockEntityRegister = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ChallengeMod.MODID);
-    public static final RegistryObject<Block> dupeBlock = registerBlock("dupe", () -> new DupeBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)));
+    public static final RegistryObject<Block> dupeBlock = registerBlock("dupe", () -> new DupeBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS), (item) -> item));
     public static final RegistryObject<BlockEntityType<DupeBlockEntity>> dupeBlockEntity = blockEntityRegister.register("dupe_be", () -> BlockEntityType.Builder.of(DupeBlockEntity::new, dupeBlock.get()).build(null));
 
     public static void register(IEventBus eventBus) {

@@ -32,9 +32,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class DupeBlockEntity extends BlockEntity implements MenuProvider {
-    private final DupeItemHandler handler = new DupeItemHandler(this, 2);
+    private final BaseItemHandler handler;
     private final List<String> allowedPlayers = new ArrayList<>();
     private static final int input = 0;
     private static final int output = 1;
@@ -42,7 +43,12 @@ public class DupeBlockEntity extends BlockEntity implements MenuProvider {
     private LazyOptional<IItemHandler> lazyHandler = LazyOptional.empty();
 
     public DupeBlockEntity(BlockPos pPos, BlockState pBlockState) {
+        this(pPos, pBlockState, (item) -> Items.AIR);
+    }
+
+    public DupeBlockEntity(BlockPos pPos, BlockState pBlockState, Function<Item, Item> func) {
         super(ModBlocks.dupeBlockEntity.get(), pPos, pBlockState);
+        this.handler = new BaseItemHandler(this, 2, func);
     }
 
     @Override
@@ -118,12 +124,15 @@ public class DupeBlockEntity extends BlockEntity implements MenuProvider {
         NetworkHooks.openScreen((ServerPlayer) pPlayer, this, pPos);
     }
 
-    static class DupeItemHandler extends ItemStackHandler {
+    static class BaseItemHandler extends ItemStackHandler {
         Item currentItem;
         final DupeBlockEntity be;
+        final Function<Item, Item> transformFunction;
 
-        public DupeItemHandler(DupeBlockEntity dbe, int slots) {
+
+        public BaseItemHandler(DupeBlockEntity dbe, int slots, Function<Item, Item> transformFunction) {
             super(slots);
+            this.transformFunction = transformFunction;
             currentItem = getStackInSlot(input).getItem();
             be = dbe;
         }
@@ -146,7 +155,8 @@ public class DupeBlockEntity extends BlockEntity implements MenuProvider {
         }
 
         public void updateOutputSlot() {
-            setStackInSlot(output, new ItemStack(currentItem, currentItem.getMaxStackSize()));
+            Item outputItem = transformFunction.apply(currentItem);
+            setStackInSlot(output, new ItemStack(outputItem, outputItem.getMaxStackSize()));
             be.setChanged();
         }
     }
