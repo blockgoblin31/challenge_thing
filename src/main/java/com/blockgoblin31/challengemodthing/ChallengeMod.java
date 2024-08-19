@@ -2,6 +2,7 @@ package com.blockgoblin31.challengemodthing;
 
 import com.blockgoblin31.challengemodthing.blocks.ModBlocks;
 import com.blockgoblin31.challengemodthing.items.ModItems;
+import com.blockgoblin31.challengemodthing.recipe.ModRecipes;
 import com.blockgoblin31.challengemodthing.screen.ModMenuTypes;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -19,5 +20,6 @@ public class ChallengeMod {
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModMenuTypes.register(modEventBus);
+        ModRecipes.register(modEventBus);
     }
 }

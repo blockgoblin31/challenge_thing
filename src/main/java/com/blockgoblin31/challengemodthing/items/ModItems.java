@@ -14,6 +14,8 @@ public class ModItems {
     public static final DeferredRegister<Item> itemRegister = DeferredRegister.create(Registries.ITEM, ChallengeMod.MODID);
     public static final HashMap<String, RegistryObject<BlockItem>> blockItemMap = new HashMap<>();
     public static final RegistryObject<Item> CURIO_ITEM = itemRegister.register("hi_taylor", () -> new CursedCuriosItem(new Item.Properties()));
+    public static final RegistryObject<Item> ANGEL_RING = itemRegister.register("angel_ring", AngelRingItem::new);
+
 
     public static void register(IEventBus eventBus) {
         itemRegister.register(eventBus);

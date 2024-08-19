@@ -87,7 +87,7 @@ public class DupeMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(ContainerLevelAccess.create(level, be.getBlockPos()), player, ModBlocks.dupeBlock.get());
+        return stillValid(ContainerLevelAccess.create(level, be.getBlockPos()), player, be.getBlockState().getBlock());
     }
 
     private void addPlayerInventory(Inventory inv) {

@@ -1,4 +1,11 @@
 {
-  "block.bg_chal.dupe": "Oak Planks",
-  "item.bg_chal.hi_taylor": ""
+  "block.minecraft.dupe": "Furnace",
+  "block.minecraft.conversion": "Furnace",
+  "block.bg_chal.dupe": "Furnace",
+  "block.bg_chal.conversion": "Furnace",
+  "item.bg_chal.hi_taylor": "",
+  "item.bg_chal.angel_ring": "Angel Ring",
+  "item.angelring.angel_ring.classic.desc0": "Angel Ring is switched into Classic Mode. Grants creative flight while in Curios slot.",
+  "item.angelring.angel_ring.classic.desc1": "Switch XP draining to more than 0 points in the config to switch to Rebalanced Mode.",
+  "curios.identifier.angelring": "Angel Ring"
 }
