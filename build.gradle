@@ -139,6 +139,9 @@ repositories {
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
+    repositories {
+        maven { url 'https://modmaven.dev/' }
+    }
 }
 
 dependencies {
@@ -162,8 +165,9 @@ dependencies {
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.0.0.12")
-
+    runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.2.0.20")
+    implementation fg.deobf("mekanism:Mekanism:1.20.1-10.4.8.43")
+    implementation fg.deobf("mekanism:Mekanism:1.20.1-10.4.8.43:generators")
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"
