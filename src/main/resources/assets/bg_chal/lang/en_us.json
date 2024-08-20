@@ -7,5 +7,7 @@
   "item.bg_chal.angel_ring": "Angel Ring",
   "item.angelring.angel_ring.classic.desc0": "Angel Ring is switched into Classic Mode. Grants creative flight while in Curios slot.",
   "item.angelring.angel_ring.classic.desc1": "Switch XP draining to more than 0 points in the config to switch to Rebalanced Mode.",
-  "curios.identifier.angelring": "Angel Ring"
+  "curios.identifier.angelring": "Angel Ring",
+  "item.angelring.angel_ring.tooltip": "Hold §eShift§7 for more information!",
+  "item.angelring.tooltip.base": "Angel Ring 2: Base"
 }

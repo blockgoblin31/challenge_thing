@@ -1,8 +1,6 @@
 package com.blockgoblin31.challengemodthing.items;
 
 import com.blockgoblin31.challengemodthing.ChallengeMod;
-import dev.denismasterherobrine.angelring.compat.curios.integration.ClassicAngelRingIntegration;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
