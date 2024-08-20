@@ -3,6 +3,9 @@ package com.blockgoblin31.challengemodthing.blocks;
 import com.blockgoblin31.challengemodthing.ChallengeMod;
 import com.blockgoblin31.challengemodthing.items.ModItems;
 import com.blockgoblin31.challengemodthing.recipe.ConversionRecipe;
+import com.hollingsworth.arsnouveau.common.block.tile.CreativeSourceJarTile;
+import com.hollingsworth.arsnouveau.common.block.tile.SourceJarTile;
+import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -33,6 +36,7 @@ public class ModBlocks {
         Optional<ConversionRecipe> recipeOptional = be.getCurrentRecipe();
         return recipeOptional.map(conversionRecipe -> conversionRecipe.getResultItem(null).getItem()).orElse(Items.AIR);
     }), conversionBlock);
+    public static final RegistryObject<Block> sourceJarBlock = registerBlock("source_jar", () -> new BEHolderBlock(BlockBehaviour.Properties.copy(BlockRegistry.SOURCE_JAR.get()), CreativeSourceJarTile::new));
 
     public static void register(IEventBus eventBus) {
         blockRegister.register(eventBus);

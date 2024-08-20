@@ -9,5 +9,7 @@
   "item.angelring.angel_ring.classic.desc1": "Switch XP draining to more than 0 points in the config to switch to Rebalanced Mode.",
   "curios.identifier.angelring": "Angel Ring",
   "item.angelring.angel_ring.tooltip": "Hold §eShift§7 for more information!",
-  "item.angelring.tooltip.base": "Angel Ring 2: Base"
+  "item.angelring.tooltip.base": "Angel Ring 2: Base",
+  "item.bg_chal.blackest_lotus": "Blackest Lotus",
+  "block.bg_chal.source_jar": "Infinite Source Jar"
 }
