@@ -2,6 +2,7 @@ package com.blockgoblin31.challengemodthing.items;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import mekanism.common.lib.radiation.RadiationManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -41,7 +42,7 @@ public class SuperRing extends Item {
                 if (!(entity instanceof Player player)) return;
                 if (player.level().isClientSide) return;
                 player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 200, 1, false, true));
-
+                RadiationManager.get().resetPlayer(player.getUUID());
             }
 
             @Override
