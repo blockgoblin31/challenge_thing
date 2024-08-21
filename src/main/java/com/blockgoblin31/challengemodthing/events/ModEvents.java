@@ -1,17 +1,22 @@
 package com.blockgoblin31.challengemodthing.events;
 
+import com.blamejared.crafttweaker.api.item.IItemStack;
+import com.blamejared.crafttweaker.natives.entity.type.player.ExpandPlayer;
 import com.blockgoblin31.challengemodthing.ChallengeMod;
 import com.blockgoblin31.challengemodthing.commands.DenyCommand;
 import com.blockgoblin31.challengemodthing.items.ModItems;
 import net.minecraft.nbt.ByteTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -56,5 +61,18 @@ public class ModEvents {
         } else {
             player.getPersistentData().put("bg31.hasRing", ByteTag.valueOf(false));
         }
+    }
+
+    @SubscribeEvent
+    static void listen(PlayerInteractEvent.RightClickBlock e) {
+        Player player = e.getEntity();
+        if (player.level().isClientSide) return;
+        if (!player.getItemInHand(e.getHand()).is(ModItems.SCANNER.get())) return;
+        ItemStack item = player.level().getBlockState(e.getPos()).getBlock().asItem().getDefaultInstance().copy();
+        if (e.getLevel().getBlockEntity(e.getPos()) != null) {
+            e.getLevel().getBlockEntity(e.getPos()).saveToItem(item);
+        }
+        if (player.isShiftKeyDown()) item.setCount(item.getMaxStackSize());
+        player.addItem(item);
     }
 }
