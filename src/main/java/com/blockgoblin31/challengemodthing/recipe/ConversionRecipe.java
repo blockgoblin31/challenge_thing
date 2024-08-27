@@ -1,6 +1,7 @@
 package com.blockgoblin31.challengemodthing.recipe;
 
 import com.blockgoblin31.challengemodthing.ChallengeMod;
+import com.blockgoblin31.challengemodthing.util.ConditionChecker;
 import com.google.gson.JsonObject;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.NonNullList;
@@ -15,6 +16,8 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.concurrent.locks.Condition;
+import java.util.function.BiPredicate;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -22,6 +25,8 @@ public class ConversionRecipe implements Recipe<SimpleContainer> {
     private final Ingredient ingredient;
     private final ItemStack output;
     private final ResourceLocation id;
+    public static BiPredicate<Level, Object> clientSideTester = (level, smth) -> level.isClientSide;
+    BiPredicate<Ingredient, SimpleContainer> ingredientChecker = (ingredient, container) -> ingredient.test(container.getItem(0));
 
     public ConversionRecipe(ResourceLocation id, ItemStack output, Ingredient ingredient) {
         this.ingredient = ingredient;
@@ -31,8 +36,8 @@ public class ConversionRecipe implements Recipe<SimpleContainer> {
 
     @Override
     public boolean matches(SimpleContainer simpleContainer, Level level) {
-        if (level.isClientSide) return false;
-        return ingredient.test(simpleContainer.getItem(0));
+        ConditionChecker checker = new ConditionChecker(clientSideTester, ingredientChecker);
+        return (checker.getNext(level, simpleContainer)) ? false : checker.getNext(ingredient, simpleContainer);
     }
 
     @Override
