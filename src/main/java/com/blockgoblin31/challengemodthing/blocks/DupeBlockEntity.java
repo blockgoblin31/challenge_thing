@@ -3,6 +3,8 @@ package com.blockgoblin31.challengemodthing.blocks;
 import com.blockgoblin31.challengemodthing.items.ModItems;
 import com.blockgoblin31.challengemodthing.recipe.ConversionRecipe;
 import com.blockgoblin31.challengemodthing.screen.DupeMenu;
+import com.blockgoblin31.challengemodthing.util.FunctionPasser;
+import com.blockgoblin31.challengemodthing.util.IterationHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
@@ -35,13 +37,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     private final BaseItemHandler handler;
-    private final List<String> allowedPlayers = new ArrayList<>();
+    private final ArrayList<String> allowedPlayers = new ArrayList<>();
     private static final int input = 0;
     private static final int output = 1;
 
@@ -85,9 +86,24 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     @Override
     protected void saveAdditional(CompoundTag pTag) {
         ListTag nbt = new ListTag();
-        for (String player : allowedPlayers) {
-            nbt.add(StringTag.valueOf(player));
-        }
+        IterationHelper.ForLoop<String> playerLoop = new IterationHelper.ForLoop<>(new FunctionPasser<>() {
+            @Override
+            public String get(String input) {
+                nbt.add(StringTag.valueOf(input));
+                return input;
+            }
+
+            @Override
+            public ArrayList<String> getFinal(ArrayList<String> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+
+            }
+        });
+        playerLoop.loop(allowedPlayers);
         pTag.put("players", nbt);
         pTag.put("inventory", handler.serializeNBT());
         super.saveAdditional(pTag);
@@ -97,9 +113,25 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     public void load(CompoundTag pTag) {
         handler.deserializeNBT(pTag.getCompound("inventory"));
         ListTag nbt = pTag.getList("players", Tag.TAG_STRING);
-        for (int i = 0; i < nbt.size(); i++) {
-            allowedPlayers.add(nbt.getString(i));
-        }
+        int[] i = {0};
+        IterationHelper.WhileLoop<String> loop = IterationHelper.whileLoop(() -> i[0] < nbt.size(), new FunctionPasser<String>() {
+            @Override
+            public String get(String input) {
+                return input;
+            }
+
+            @Override
+            public ArrayList<String> getFinal(ArrayList<String> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+                allowedPlayers.add(nbt.getString(i[0]));
+                i[0] = i[0] + 1;
+            }
+        });
+        loop.loopThrough();
         super.load(pTag);
     }
 
@@ -144,9 +176,25 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
 
     Optional<ConversionRecipe> getCurrentRecipe() {
         SimpleContainer inventory = new SimpleContainer(handler.getSlots());
-        for (int i = 0; i < handler.getSlots(); i++) {
-            inventory.setItem(i, handler.getStackInSlot(i));
-        }
+        int[] i = {0};
+        IterationHelper.WhileLoop<ItemStack> loop = IterationHelper.whileLoop(() -> i[0] < handler.getSlots(), new FunctionPasser<ItemStack>() {
+            @Override
+            public ItemStack get(ItemStack input) {
+                return input;
+            }
+
+            @Override
+            public ArrayList<ItemStack> getFinal(ArrayList<ItemStack> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+                inventory.setItem(i[0], handler.getStackInSlot(i[0]));
+                i[0] = i[0] + 1;
+            }
+        });
+        loop.loopThrough();
         return this.getLevel().getRecipeManager().getRecipeFor(ConversionRecipe.ConversionRecipeType.instance, inventory, this.level);
     }
 

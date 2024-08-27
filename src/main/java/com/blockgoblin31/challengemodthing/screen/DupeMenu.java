@@ -2,6 +2,8 @@ package com.blockgoblin31.challengemodthing.screen;
 
 import com.blockgoblin31.challengemodthing.blocks.DupeBlockEntity;
 import com.blockgoblin31.challengemodthing.blocks.ModBlocks;
+import com.blockgoblin31.challengemodthing.util.FunctionPasser;
+import com.blockgoblin31.challengemodthing.util.IterationHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +15,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
+
+import java.util.ArrayList;
 
 public class DupeMenu extends AbstractContainerMenu {
     public final DupeBlockEntity be;
@@ -91,18 +95,62 @@ public class DupeMenu extends AbstractContainerMenu {
     }
 
     private void addPlayerInventory(Inventory inv) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 9; j++) {
-                addSlot(new Slot(inv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+        int[] i = {0};
+        IterationHelper.WhileLoop<Slot> slotLoop = IterationHelper.whileLoop(() -> i[0] < 3, new FunctionPasser<Slot>() {
+            @Override
+            public Slot get(Slot input) {
+                return input;
             }
-        }
+
+            @Override
+            public ArrayList<Slot> getFinal(ArrayList<Slot> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+                int[] j = {0};
+                IterationHelper.WhileLoop<Slot> internalSlotLoop = IterationHelper.whileLoop(() -> j[0] < 3, new FunctionPasser<Slot>() {
+                    @Override
+                    public Slot get(Slot input) {
+                        return input;
+                    }
+
+                    @Override
+                    public ArrayList<Slot> getFinal(ArrayList<Slot> input) {
+                        return input;
+                    }
+
+                    @Override
+                    public void process() {
+                        addSlot(new Slot(inv, j[0] + i[0] * 9 + 9, 8 + j[0] * 18, 84 + i[0] * 18));
+                        j[0] = j[0] + 1;
+                    }
+                });
+                i[0] = i[0] + 1;
+            }
+        });
+        slotLoop.loopThrough();
     }
 
     private void addPlayerHotbar(Inventory inv) {
-        for (int i = 0; i < 9; i++) {
-            addSlot(new Slot(inv, i, 8 + i * 18, 142));
-        }
+        int[] i = {0};
+        IterationHelper.WhileLoop<Slot> slotLoop = IterationHelper.whileLoop(() -> i[0] < 9, new FunctionPasser<Slot>() {
+            @Override
+            public Slot get(Slot input) {
+                return input;
+            }
+
+            @Override
+            public ArrayList<Slot> getFinal(ArrayList<Slot> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+                addSlot(new Slot(inv, i[0], 8 + i[0] * 18, 142));
+                i[0] = i[0] + 1;
+            }
+        });
     }
-
-
 }

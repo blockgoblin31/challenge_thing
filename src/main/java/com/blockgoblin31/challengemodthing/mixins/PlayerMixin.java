@@ -1,5 +1,7 @@
 package com.blockgoblin31.challengemodthing.mixins;
 
+import com.blockgoblin31.challengemodthing.util.FunctionPasser;
+import com.blockgoblin31.challengemodthing.util.IterationHelper;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -39,24 +41,39 @@ public abstract class PlayerMixin extends Player {
         if (this.getPersistentData().contains("bg31.deny")) return;
         if (!this.getAdvancements().getOrStartProgress(this.server.getAdvancements().getAdvancement(new ResourceLocation("minecraft:story/mine_stone"))).isDone()) return;
         NonNullList<ItemStack> items = this.getInventory().items;
-        ArrayList<ItemStack> greatest = new ArrayList<>();
+        final ArrayList<ItemStack> greatest = new ArrayList<>();
         greatest.add(items.get(9));
-        for (int i = 9; i < items.size(); i++) {
-            ItemStack stack = items.get(i);
-            if (getItemInHand(InteractionHand.MAIN_HAND) == stack || getItemInHand(InteractionHand.OFF_HAND) == stack) continue;
-            if (stack.is(Items.COBBLESTONE)) continue;
-            if (!stack.isStackable()) {
-                if (greatest.get(0).isStackable() || greatest.get(0).is(Items.AIR)) greatest.clear();
-                greatest.add(stack);
-                continue;
+        int[] i = {0};
+        IterationHelper.WhileLoop<ItemStack> itemLoop = IterationHelper.whileLoop(() -> i[0]++ < 9, new FunctionPasser<ItemStack>() {
+            @Override
+            public ItemStack get(ItemStack input) {
+                return null;
             }
-            if (stack.getCount() > greatest.get(0).getCount()) {
-                greatest = new ArrayList<>();
-                greatest.add(stack);
-            } else if (stack.getCount() == greatest.get(0).getCount()) {
-                greatest.add(stack);
+
+            @Override
+            public ArrayList<ItemStack> getFinal(ArrayList<ItemStack> input) {
+                return null;
             }
-        }
+
+            @Override
+            public void process() {
+                ItemStack stack = items.get(i[0]);
+                if (getItemInHand(InteractionHand.MAIN_HAND) == stack || getItemInHand(InteractionHand.OFF_HAND) == stack) return;
+                if (stack.is(Items.COBBLESTONE)) return;
+                if (!stack.isStackable()) {
+                    if (greatest.get(0).isStackable() || greatest.get(0).is(Items.AIR)) greatest.clear();
+                    greatest.add(stack);
+                    return;
+                }
+                if (stack.getCount() > greatest.get(0).getCount()) {
+                    greatest.clear();
+                    greatest.add(stack);
+                } else if (stack.getCount() == greatest.get(0).getCount()) {
+                    greatest.add(stack);
+                }
+            }
+        });
+        itemLoop.loopThrough();
         ItemStack stack = greatest.get(this.random.nextInt(greatest.size()));
         if (stack.is(Items.AIR)) return;
         int index = items.indexOf(stack);

@@ -16,8 +16,11 @@ public class ModItems {
     public static final RegistryObject<Item> CURIO_ITEM = itemRegister.register("hi_taylor", () -> new CursedCuriosItem(new Item.Properties()));
     public static final RegistryObject<Item> ANGEL_RING = itemRegister.register("angel_ring", AngelRingItem::new);
     public static final RegistryObject<Item> BLACKEST_LOTUS = itemRegister.register("blackest_lotus", () -> new BlackestLotusItem(new Item.Properties()));
-    public static final RegistryObject<Item> SCANNER = itemRegister.register("scanner", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SCANNER = itemRegister.register("scanner", () -> new ScannerItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SUPER_RING = itemRegister.register("why_bother", () -> new SuperRing(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> NUKE = itemRegister.register("oopsie", () -> new Nuke(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WAND = itemRegister.register("dim", () -> new WandItem(new Item.Properties()));
+
 
     public static void register(IEventBus eventBus) {
         itemRegister.register(eventBus);
