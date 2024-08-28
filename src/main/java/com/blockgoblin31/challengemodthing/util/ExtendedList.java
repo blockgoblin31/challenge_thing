@@ -363,27 +363,38 @@ public class ExtendedList<E> extends ArrayList<E> implements Cloneable {
                 }
             }
         };
-        while (consecutive < e.length) {
-            index = indexOf(e[0]);
-            for (E e1 : e) {
-                if (index >= size()) {
-                    return false;
-                }
-                if (!get(index).equals(e1)) break;
-                index++;
-                consecutive++;
-            }
-            consecutive = 0;
-        }
-        return true;
+        IterationHelper.WhileLoop<E> loop = IterationHelper.whileLoop(() -> !stopProcessing[0], func);
+        loop.loopThrough();
+        return func.getOutput();
     }
 
     public String toUnformattedString() {
-        StringBuilder output = new StringBuilder();
-        for (E e : this) {
-            output.append(e.toString());
-        }
-        return output.toString();
+        OutputHandlingFunctionPasser<E, String> func = new OutputHandlingFunctionPasser<E, String>() {
+            StringBuilder output = new StringBuilder();
+            @Override
+            public String getOutput() {
+                return output.toString();
+            }
+
+            @Override
+            public E get(E input) {
+                output.append(input.toString());
+                return input;
+            }
+
+            @Override
+            public ArrayList<E> getFinal(ArrayList<E> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+
+            }
+        };
+        IterationHelper.ForLoop<E> loop = IterationHelper.forLoop(func);
+        loop.loop(this);
+        return func.getOutput();
     }
 
     @Override

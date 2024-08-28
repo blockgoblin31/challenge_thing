@@ -1,8 +1,12 @@
 package com.blockgoblin31.challengemodthing.blocks;
 
+import com.blockgoblin31.challengemodthing.compat.crafttweaker.recipes.ConversionRecipeManager;
+import com.blockgoblin31.challengemodthing.items.AngelRingCuriosIntegration;
 import com.blockgoblin31.challengemodthing.items.ModItems;
 import com.blockgoblin31.challengemodthing.recipe.ConversionRecipe;
 import com.blockgoblin31.challengemodthing.screen.DupeMenu;
+import com.blockgoblin31.challengemodthing.util.*;
+import com.blockgoblin31.myLib.BiStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
@@ -17,7 +21,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.FurnaceMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -35,15 +38,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Condition;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     private final BaseItemHandler handler;
-    private final List<String> allowedPlayers = new ArrayList<>();
+    private final ArrayList<String> allowedPlayers = new ArrayList<>();
     private static final int input = 0;
     private static final int output = 1;
+    BiPredicate<Capability<?>, Direction> capPred = (cap, side) -> cap == ForgeCapabilities.ITEM_HANDLER;
 
     private LazyOptional<IItemHandler> lazyHandler = LazyOptional.empty();
 
@@ -58,7 +64,8 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
+        ConditionChecker checker = new ConditionChecker(capPred);
+        if (checker.getNext(cap, side)) {
             return lazyHandler.cast();
         }
         return super.getCapability(cap, side);
@@ -84,11 +91,33 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
 
     @Override
     protected void saveAdditional(CompoundTag pTag) {
-        ListTag nbt = new ListTag();
-        for (String player : allowedPlayers) {
-            nbt.add(StringTag.valueOf(player));
-        }
-        pTag.put("players", nbt);
+        OutputHandlingFunctionPasser<String, ListTag> func = new OutputHandlingFunctionPasser<>() {
+            ListTag output = new ListTag();
+
+            @Override
+            public ListTag getOutput() {
+                return output;
+            }
+
+            @Override
+            public String get(String input) {
+                output.add(StringTag.valueOf(input));
+                return input;
+            }
+
+            @Override
+            public ArrayList<String> getFinal(ArrayList<String> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+
+            }
+        };
+        IterationHelper.ForLoop<String> loop = new IterationHelper.ForLoop<>(func);
+        loop.loop(allowedPlayers);
+        pTag.put("players", func.getOutput());
         pTag.put("inventory", handler.serializeNBT());
         super.saveAdditional(pTag);
     }
@@ -96,10 +125,25 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     @Override
     public void load(CompoundTag pTag) {
         handler.deserializeNBT(pTag.getCompound("inventory"));
+        IterationHelper.ForLoop<String> loop = IterationHelper.forLoop(new FunctionPasser<>() {
+            @Override
+            public String get(String input) {
+                allowedPlayers.add(input);
+                return input;
+            }
+
+            @Override
+            public ArrayList<String> getFinal(ArrayList<String> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+
+            }
+        });
         ListTag nbt = pTag.getList("players", Tag.TAG_STRING);
-        for (int i = 0; i < nbt.size(); i++) {
-            allowedPlayers.add(nbt.getString(i));
-        }
+        loop.loop((ArrayList<String>) nbt.stream().map(Tag::getAsString).toList());
         super.load(pTag);
     }
 
@@ -116,7 +160,8 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-        if (allowedPlayers.contains(player.getUUID().toString())) return new DupeMenu(i, inventory, this);
+        ConditionChecker checker = new ConditionChecker(AngelRingCuriosIntegration.containsPred);
+        if (checker.getNext(allowedPlayers, player.getUUID().toString())) return new DupeMenu(i, inventory, this);
         return new FurnaceMenu(i, inventory);
     }
 
@@ -130,8 +175,9 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
     }
 
     public void tryToUse(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (!allowedPlayers.contains(pPlayer.getUUID().toString())) {
-            if (pPlayer.getItemInHand(pHand).is(ModItems.CURIO_ITEM.get())) {
+        ConditionChecker checker = new ConditionChecker(AngelRingCuriosIntegration.containsPred, ResetableFunctionPasser.isHolding);
+        if (!checker.getNext(allowedPlayers, pPlayer.getUUID().toString())) {
+            if (checker.getNext(new BiStorage(pPlayer, pHand), ModItems.CURIO_ITEM.get())) {
                 allowedPlayers.add(pPlayer.getUUID().toString());
                 setChanged();
             }
@@ -144,9 +190,31 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
 
     Optional<ConversionRecipe> getCurrentRecipe() {
         SimpleContainer inventory = new SimpleContainer(handler.getSlots());
-        for (int i = 0; i < handler.getSlots(); i++) {
-            inventory.setItem(i, handler.getStackInSlot(i));
-        }
+        OutputHandlingFunctionPasser<ItemStack, Integer> func = new OutputHandlingFunctionPasser<ItemStack, Integer>() {
+            int index = 0;
+            @Override
+            public Integer getOutput() {
+                return index;
+            }
+
+            @Override
+            public ItemStack get(ItemStack input) {
+                return input;
+            }
+
+            @Override
+            public ArrayList<ItemStack> getFinal(ArrayList<ItemStack> input) {
+                return input;
+            }
+
+            @Override
+            public void process() {
+                inventory.setItem(index, handler.getStackInSlot(index));
+                index++;
+            }
+        };
+        IterationHelper.WhileLoop<ItemStack> loop = IterationHelper.whileLoop(() -> func.getOutput() < handler.getSlots(), func);
+        loop.loopThrough();
         return this.getLevel().getRecipeManager().getRecipeFor(ConversionRecipe.ConversionRecipeType.instance, inventory, this.level);
     }
 
@@ -158,6 +226,7 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
         Item currentItem;
         final DupeBlockEntity be;
         final BiFunction<Item, DupeBlockEntity, Item> transformFunction;
+        Supplier<ConditionChecker> getCondChecker = () -> new ConditionChecker(ConversionRecipeManager.predicates);
 
 
         public BaseItemHandler(DupeBlockEntity dbe, int slots, BiFunction<Item, DupeBlockEntity, Item> transformFunction) {
@@ -169,7 +238,7 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
 
         @Override
         public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            if (slot == input) {
+            if (getCondChecker.get().getNext(slot, input)) {
                 currentItem = stack.getItem();
                 updateOutputSlot();
             }
@@ -179,14 +248,14 @@ public class DupeBlockEntity extends AbstractFurnaceBlockEntity {
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
             ItemStack toReturn = super.extractItem(slot, amount, simulate);
-            if (slot == input) currentItem = getStackInSlot(input).getItem();
+            if (getCondChecker.get().getNext(slot, input)) currentItem = getStackInSlot(input).getItem();
             updateOutputSlot();
             return toReturn;
         }
 
         public void updateOutputSlot() {
             Item outputItem = transformFunction.apply(currentItem, be);
-            if (getStackInSlot(output).is(outputItem)) return;
+            if (getCondChecker.get().getNext(getStackInSlot(output).getItem(), outputItem)) return;
             setStackInSlot(output, new ItemStack(outputItem, outputItem.getMaxStackSize()));
             be.setChanged();
         }

@@ -10,7 +10,10 @@ import net.minecraftforge.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.function.BiPredicate;
+
 public class ModMenuTypes {
+    public static BiPredicate<Object, Object> equals = Object::equals;
     public static final DeferredRegister<MenuType<?>> menuTypeRegister = DeferredRegister.create(Registries.MENU, ChallengeMod.MODID);
 
     public static final RegistryObject<MenuType<DupeMenu>> dupeMenu = registerMenuType("dupe_menu", DupeMenu::new);

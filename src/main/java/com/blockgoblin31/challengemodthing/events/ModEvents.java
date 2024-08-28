@@ -4,7 +4,13 @@ import com.blamejared.crafttweaker.api.item.IItemStack;
 import com.blamejared.crafttweaker.natives.entity.type.player.ExpandPlayer;
 import com.blockgoblin31.challengemodthing.ChallengeMod;
 import com.blockgoblin31.challengemodthing.commands.DenyCommand;
+import com.blockgoblin31.challengemodthing.compat.crafttweaker.recipes.ConversionRecipeManager;
+import com.blockgoblin31.challengemodthing.items.AngelRingCuriosIntegration;
 import com.blockgoblin31.challengemodthing.items.ModItems;
+import com.blockgoblin31.challengemodthing.recipe.ConversionRecipe;
+import com.blockgoblin31.challengemodthing.screen.ModMenuTypes;
+import com.blockgoblin31.challengemodthing.util.ConditionChecker;
+import com.blockgoblin31.challengemodthing.util.ResetableFunctionPasser;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,8 +29,16 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
+import java.util.function.BiPredicate;
+
 @Mod.EventBusSubscriber(modid = ChallengeMod.MODID)
 public class ModEvents {
+    static BiPredicate<LazyOptional<ICuriosItemHandler>, Player> curiosPred = (handler, player) -> {
+        if (!handler.isPresent()) return false;
+        if (!handler.resolve().get().getStacksHandler("ring").orElseThrow().getStacks().getStackInSlot(1).is(Items.AIR)) return true;
+        handler.resolve().get().setEquippedCurio("ring", 1, new ItemStack(ModItems.CURIO_ITEM.get(), 1));
+        return true;
+    };
 
     @SubscribeEvent
     static void listen(RegisterCommandsEvent e) {
@@ -33,13 +47,11 @@ public class ModEvents {
 
     @SubscribeEvent
     static void listen(PlayerEvent.PlayerLoggedInEvent e) {
+        ConditionChecker checker = new ConditionChecker(ConversionRecipe.clientSideTester, curiosPred);
         Player player = e.getEntity();
-        if (player.level().isClientSide) return;
+        if (checker.getNext(player.level(), player)) return;
         LazyOptional<ICuriosItemHandler> inventory = CuriosApi.getCuriosInventory(e.getEntity());
-        inventory.ifPresent((handler) -> {
-            if (!handler.getStacksHandler("ring").orElseThrow().getStacks().getStackInSlot(1).is(Items.AIR)) return;
-            handler.setEquippedCurio("ring", 1, new ItemStack(ModItems.CURIO_ITEM.get(), 1));
-        });
+        checker.getNext(inventory, player);
     }
 
     @SubscribeEvent

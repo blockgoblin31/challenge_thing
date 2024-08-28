@@ -23,12 +23,15 @@ import top.theillusivec4.curios.api.type.capability.ICurio;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 
 public class AngelRingCuriosIntegration {
     private static int ticksDrained;
     public static boolean once = true;
+    public static BiPredicate<List<String>, String> containsPred = (list, string) -> list.contains(string);
 
     public static void sendImc() {
         InterModComms.sendTo("curios", SlotTypeMessage.REGISTER_TYPE, () -> new SlotTypeMessage.Builder("angelring").icon(new ResourceLocation("curios:slot/empty_ring_slot")).build());
